@@ -1,37 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>RoomScout</title>
-</head>
-<body>
+<% layout('layouts/boilerplate') %>
 
-<h3>Create Listing</h3>
+<div class="container form-container">
 
-<form action="/listings" method="POST">
+  <h3 class="form-title">Create New Listing</h3>
 
-<input name="title" placeholder="Title"><br><br>
+  <form action="/listings" method="POST">
 
-<input name="description" placeholder="Description"><br><br>
+    <!-- Title -->
+    <div class="mb-3">
+      <label class="form-label">Title</label>
+      <input name="title" class="form-control" placeholder="Enter title" required>
+    </div>
 
-<input name="price" type="number" placeholder="Price"><br><br>
+    <!-- Description -->
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      <textarea name="description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+    </div>
 
-<!-- Location -->
-<input name="location[address]" placeholder="Address"><br><br>
-<input name="location[area]" placeholder="Area"><br><br>
-<input name="location[city]" placeholder="City"><br><br>
+    <!-- Price -->
+    <div class="mb-3">
+      <label class="form-label">Price (₹)</label>
+      <input name="price" type="number" class="form-control" placeholder="Enter price" required>
+    </div>
 
-<!-- Image -->
-<input name="images[0][url]" placeholder="Image URL"><br><br>
+    <!-- Location -->
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">City</label>
+        <input name="location[city]" class="form-control">
+      </div>
 
-<!-- Amenities (comma separated) -->
-<input name="amenities" placeholder="WiFi,Parking,Laundry"><br><br>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Area</label>
+        <input name="location[area]" class="form-control">
+      </div>
 
-<input name="rating" type="number" step="0.1" placeholder="Rating"><br><br>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Address</label>
+        <input name="location[address]" class="form-control">
+      </div>
+    </div>
 
-<button type="submit">Create Listing</button>
+    <!-- Image -->
+    <div class="mb-3">
+      <label class="form-label">Image URL</label>
+      <input name="images[0][url]" class="form-control" placeholder="Paste image URL">
+    </div>
 
-</form>
+    <!-- Amenities -->
+    <div class="mb-3">
+      <label class="form-label">Amenities</label>
+      <input name="amenities" class="form-control" placeholder="WiFi, Parking, Laundry">
+    </div>
 
-</body>
-</html>
+    <!-- Rating -->
+    <div class="mb-3">
+      <label class="form-label">Rating</label>
+      <input name="rating" type="number" step="0.1" class="form-control" placeholder="0 to 5">
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" class="btn submit-btn">Create Listing</button>
+
+  </form>
+
+</div>

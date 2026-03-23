@@ -1,23 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoomsScout</title>
-</head>
-<body>
-    <h3>All Listings</h3>
-    <form action="/listings/new" method="get">
-        <button type="submit">Create New Listing</button>
-    </form>
-    <ul>
-        <% for (let listing of allListings) { %>
-        <li>
-            <a href="/listings/<%= listing._id %>">
+<% layout('layouts/boilerplate') %>
+
+<div class="container page-container">
+  <h3>All Listings</h3>
+
+  <div class="row">
+
+    <% for (let listing of allListings) { %>
+
+      <div class="col-md-4 mb-4">
+        
+        <a href="/listings/<%= listing._id %>" class="card-link">
+          
+          <div class="card h-100">
+
+            <!-- Optimized Image -->
+            <img 
+              src="<%= listing.images[0]?.url || 'https://via.placeholder.com/300' %>" 
+              class="card-img-top"
+              alt="listing-image"
+              loading="lazy"
+            >
+
+            <div class="card-body">
+
+              <h5 class="card-title">
                 <%= listing.title %>
-            </a>
-        </li>
-        <% } %>
-    </ul>
-</body>
-</html>
+              </h5>
+
+              <p class="price">
+                ₹ <%= listing.price %> / month
+              </p>
+
+              <p class="location">
+                <%= listing.location?.city %>, <%= listing.location?.area %>
+              </p>
+
+              <p class="rating">
+                ⭐ <%= listing.rating %>
+              </p>
+
+            </div>
+
+          </div>
+
+        </a>
+
+      </div>
+
+    <% } %>
+
+  </div>
+</div>

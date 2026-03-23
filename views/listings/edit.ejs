@@ -1,37 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>RoomScout</title>
-</head>
-<body>
+<% layout('layouts/boilerplate') %>
 
-<h3>Edit Listing</h3>
+<div class="container page-container">
 
-<form action="/listings/<%= listing._id %>?_method=PUT" method="POST">
+  <div class="form-container">
 
-<input name="title" value="<%= listing.title %>"><br><br>
+    <h3 class="form-title">Edit Listing</h3>
 
-<input name="description" value="<%= listing.description %>"><br><br>
+    <form action="/listings/<%= listing._id %>?_method=PUT" method="POST">
 
-<input name="price" type="number" value="<%= listing.price %>"><br><br>
+      <!-- Title -->
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input 
+          name="title" 
+          class="form-control" 
+          value="<%= listing.title %>" 
+          required
+        >
+      </div>
 
-<!-- Location -->
-<input name="location[address]" value="<%= listing.location.address %>"><br><br>
-<input name="location[area]" value="<%= listing.location.area %>"><br><br>
-<input name="location[city]" value="<%= listing.location.city %>"><br><br>
+      <!-- Description -->
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea 
+          name="description" 
+          class="form-control" 
+          rows="3"
+        ><%= listing.description %></textarea>
+      </div>
 
-<!-- Image -->
-<input name="images[0][url]" value="<%= listing.images[0].url %>"><br><br>
+      <!-- Price -->
+      <div class="mb-3">
+        <label class="form-label">Price (₹)</label>
+        <input 
+          name="price" 
+          type="number" 
+          class="form-control" 
+          value="<%= listing.price %>" 
+          required
+        >
+      </div>
 
-<!-- Amenities -->
-<input name="amenities" value="<%= listing.amenities.join(',') %>"><br><br>
+      <!-- Location -->
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">City</label>
+          <input 
+            name="location[city]" 
+            class="form-control" 
+            value="<%= listing.location?.city || '' %>"
+          >
+        </div>
 
-<input name="rating" type="number" step="0.1" value="<%= listing.rating %>"><br><br>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Area</label>
+          <input 
+            name="location[area]" 
+            class="form-control" 
+            value="<%= listing.location?.area || '' %>"
+          >
+        </div>
 
-<button type="submit">Update</button>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Address</label>
+          <input 
+            name="location[address]" 
+            class="form-control" 
+            value="<%= listing.location?.address || '' %>"
+          >
+        </div>
+      </div>
 
-</form>
+      <!-- Image -->
+      <div class="mb-3">
+        <label class="form-label">Image URL</label>
+        <input 
+          name="images[0][url]" 
+          class="form-control" 
+          value="<%= listing.images[0]?.url || '' %>"
+        >
+      </div>
 
-</body>
-</html>
+      <!-- Amenities -->
+      <div class="mb-3">
+        <label class="form-label">Amenities</label>
+        <input 
+          name="amenities" 
+          class="form-control" 
+          value="<%= listing.amenities?.join(', ') || '' %>"
+        >
+      </div>
+
+      <!-- Rating -->
+      <div class="mb-3">
+        <label class="form-label">Rating</label>
+        <input 
+          name="rating" 
+          type="number" 
+          step="0.1" 
+          class="form-control" 
+          value="<%= listing.rating || 0 %>"
+        >
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="submit-btn">
+        Update Listing
+      </button>
+
+    </form>
+
+  </div>
+
+</div>

@@ -1,0 +1,285 @@
+/* Reset + Base */
+body {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: linear-gradient(to right, #f7f7f7, #fdfdfd);
+  margin: 0;
+  padding: 0;
+}
+
+/* Navbar */
+.navbar {
+  height: 5rem;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.navbar-brand i {
+  color: #fe424d;
+  font-size: 2rem;
+}
+
+.nav-link {
+  color: #222 !important;
+  font-weight: 500;
+}
+
+/* Footer */
+.f-info {
+  background-color: #f1f1f1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+}
+
+.f-info-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.f-info-links a {
+  text-decoration: none;
+  color: #222;
+}
+
+.f-info-links a:hover {
+  text-decoration: underline;
+}
+
+.f-info-socials i {
+  font-size: 1.5rem;
+  margin: 0 0.5rem;
+  color: #222;
+}
+
+.f-info-socials i:hover {
+  color: #fe424d;
+  cursor: pointer;
+}
+
+/* Page container */
+.page-container {
+  margin-top: 20px;
+  max-width: 1200px;
+}
+
+/* Grid spacing */
+.row {
+  row-gap: 20px;
+}
+
+/* Heading */
+h3 {
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Cards */
+/* Card */
+.card {
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: #fff;
+  transition: transform 0.2s ease;
+  will-change: transform;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+/* Image (NO zoom effect) */
+.card-img-top {
+  height: 220px;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* Card body */
+.card-body {
+  padding: 14px;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.location {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.rating {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #f59e0b;
+}
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Form container (used for new + edit) */
+.form-container {
+  max-width: 700px;
+  margin: 50px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+}
+
+/* Form title */
+.form-title {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+/* Labels */
+.form-label {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+/* Inputs */
+.form-control {
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  transition: all 0.2s ease;
+}
+
+.form-control:hover {
+  border-color: #bbb;
+}
+
+.form-control:focus {
+  border-color: #fe424d;
+  box-shadow: 0 0 0 3px rgba(254,66,77,0.15);
+}
+
+/* Button */
+.submit-btn {
+  width: 100%;
+  background-color: #fe424d;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(254,66,77,0.25);
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover {
+  background-color: #e63946;
+  transform: scale(1.04);
+  box-shadow: 0 8px 20px rgba(254,66,77,0.35);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-container {
+    margin: 20px;
+    padding: 20px;
+  }
+}
+
+/* Show page */
+.show-card {
+  max-width: 700px;
+  margin: 30px auto;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Image */
+.show-img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+}
+
+/* Title */
+.show-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* Price */
+.show-price {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #000;
+}
+
+/* Location */
+.show-location {
+  color: #777;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+/* Description */
+.show-desc {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+/* Amenities */
+.show-amenities {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+/* Rating */
+.show-rating {
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+/* Buttons */
+.show-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn {
+  background-color: #222;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.delete-btn {
+  background-color: #fe424d;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+}
+
+.delete-btn:hover {
+  background-color: #e63946;
+}
