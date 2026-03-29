@@ -8,6 +8,9 @@ const path = require("path");
 const methodOverride = require("method-override");
 app.use(methodOverride("_method"));
 const ejsMate = require("ejs-mate");
+const ExpressError = require("./utils/Expresserror.ejs");
+const wrapAsync = require("./utils/wrapAsync");
+const { validateListing } = require("./schema");
 
 const MONGO_URL = 'mongodb://127.0.0.1:27017/roomscout';
 
@@ -44,7 +47,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 
 // sample listing
-app.get("/testlisting", async (req, res) => {
+app.get("/testlisting", wrapAsync ( async(req, res) => {
     try {
 
         const sampleListing = new Listing({
@@ -80,13 +83,13 @@ app.get("/testlisting", async (req, res) => {
         console.log(err);
         res.send("Error creating listing");
     }
-});
+}));
 
 // index route
-app.get("/listings",async (req,res) =>{
+app.get("/listings",wrapAsync ( async (req,res) =>{
    const allListings = await Listing.find({});
    res.render("listings/index.ejs", {allListings});
-});
+}));
 
 // new route
 app.get("/listings/new", (req ,res)=>{
@@ -94,50 +97,63 @@ app.get("/listings/new", (req ,res)=>{
 });
 
 // save data
-app.post("/listings", async (req, res) => {
-    let data = req.body;
+app.post("/listings", validateListing, wrapAsync(async (req, res) => {
+    let data = req.body.listing;
 
     // convert amenities to array
-    data.amenities = data.amenities.split(",");
+    if (data.amenities) {
+        data.amenities = data.amenities.split(",");
+    }
 
     const newListing = new Listing(data);
     await newListing.save();
-
     res.redirect("/listings");
-});
+}));
 // show route
-app.get("/listings/:id" , async (req ,res) =>{
+app.get("/listings/:id" , wrapAsync(async (req ,res) =>{
     const {id} = req.params;
     const listing = await Listing.findById(id); 
     res.render("listings/show", { listing });
-});
+}));
 
 //edit route
-app.get("/listings/:id/edit",async (req,res)=>{
+app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
      const {id} = req.params;
     const listing = await Listing.findById(id); 
     res.render("listings/edit.ejs",{ listing })
-});
+}));
 
-app.put("/listings/:id", async (req, res) => {
+app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
     const { id } = req.params;
 
-    let data = req.body;
+    let data = req.body.listing;
 
     // fix amenities (string → array)
-    data.amenities = data.amenities.split(",");
+    if (data.amenities) {
+        data.amenities = data.amenities.split(",");
+    }
 
-    await Listing.findByIdAndUpdate(id, data);
+    await Listing.findByIdAndUpdate(id, { ...data });
 
     res.redirect(`/listings/${id}`);
-});
+}));
 
 // delete listing
-app.delete("/listings/:id", async (req, res) => {
+app.delete("/listings/:id",wrapAsync(async (req, res) => {
     const { id } = req.params;
 
     await Listing.findByIdAndDelete(id);
 
     res.redirect("/listings");
-});
+}));
 
+
+
+
+// all routes above
+
+app.use((err, req, res, next) => {
+  
+  let { status = 500, message = "Something went wrong" } = err;
+  res.status(status).render("listings/error", { err });
+});
