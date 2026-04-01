@@ -8,9 +8,10 @@ const path = require("path");
 const methodOverride = require("method-override");
 app.use(methodOverride("_method"));
 const ejsMate = require("ejs-mate");
-const ExpressError = require("./utils/Expresserror.ejs");
+const ExpressError = require("./utils/Expresserror.js");
 const wrapAsync = require("./utils/wrapAsync");
-const { validateListing } = require("./schema");
+const { validateListing, validateReview } = require("./schema");
+const Review = require("../RoomScout/models/review");
 
 const MONGO_URL = 'mongodb://127.0.0.1:27017/roomscout';
 
@@ -76,8 +77,19 @@ app.get("/testlisting", wrapAsync ( async(req, res) => {
         });
 
         await sampleListing.save();
+        console.log("Sample listing ID:", sampleListing._id);
 
-        res.send("Test listing created");
+        // Seed sample review
+        const sampleReview = new Review({
+            listing: sampleListing._id,
+            author: new mongoose.Types.ObjectId(), // dummy author
+            rating: 5,
+            body: "Great room! Clean and comfortable with good amenities."
+        });
+        await sampleReview.save();
+        console.log("Sample review created");
+
+        res.send(`Test listing created (ID: ${sampleListing._id}). Sample review also added.`);
 
     } catch (err) {
         console.log(err);
@@ -112,7 +124,7 @@ app.post("/listings", validateListing, wrapAsync(async (req, res) => {
 // show route
 app.get("/listings/:id" , wrapAsync(async (req ,res) =>{
     const {id} = req.params;
-    const listing = await Listing.findById(id); 
+    const listing = await Listing.findById(id).populate('reviews'); 
     res.render("listings/show", { listing });
 }));
 
@@ -141,10 +153,47 @@ app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
 // delete listing
 app.delete("/listings/:id",wrapAsync(async (req, res) => {
     const { id } = req.params;
-
+    
+    // Cascade delete reviews first
+    const listing = await Listing.findById(id).populate('reviews');
+    if (listing && listing.reviews && listing.reviews.length > 0) {
+        await Review.deleteMany({ _id: { $in: listing.reviews.map(r => r._id) } });
+    }
+    
     await Listing.findByIdAndDelete(id);
-
     res.redirect("/listings");
+}));
+
+// create review
+app.post("/listings/:id/reviews", validateReview, wrapAsync(async (req, res) => {
+    const { id } = req.params;
+    const listing = await Listing.findById(id);
+
+    if (!listing) {
+        throw new ExpressError("Listing not found", 404);
+    }
+
+    const review = new Review({ 
+        listing: id, 
+        author: new mongoose.Types.ObjectId(),
+        rating: req.body.review.rating, 
+        body: req.body.review.body 
+    });
+
+    listing.reviews.push(review._id);
+
+    await review.save();
+    await listing.save();
+
+    res.redirect(`/listings/${id}`);
+}));
+
+// delete review
+app.delete("/listings/:id/reviews/:reviewId", wrapAsync(async (req, res) => {
+    const { id, reviewId } = req.params;
+    await Review.findByIdAndDelete(reviewId);
+    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+    res.redirect(`/listings/${id}`);
 }));
 
 
@@ -153,7 +202,6 @@ app.delete("/listings/:id",wrapAsync(async (req, res) => {
 // all routes above
 
 app.use((err, req, res, next) => {
-  
-  let { status = 500, message = "Something went wrong" } = err;
-  res.status(status).render("listings/error", { err });
+    const { statusCode = 500, message = "Something went wrong" } = err;
+    res.status(statusCode).send(message);
 });

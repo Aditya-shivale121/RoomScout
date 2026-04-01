@@ -283,3 +283,43 @@ h3 {
 .delete-btn:hover {
   background-color: #e63946;
 }
+
+/* Review Styling */
+.review-section h5 {
+  color: #333;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #fe424d;
+  padding-bottom: 0.5rem;
+}
+
+.reviews-list h5 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.review-item {
+  transition: all 0.2s ease;
+}
+
+.review-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+.no-reviews {
+  padding: 2rem;
+  border: 2px dashed #ddd;
+  border-radius: 12px;
+}
+
+.no-reviews strong {
+  color: #fe424d;
+}
+
+/* Responsive reviews */
+@media (max-width: 768px) {
+  .review-item .d-flex {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

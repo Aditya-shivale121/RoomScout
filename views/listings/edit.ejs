@@ -6,17 +6,18 @@
 
     <h3 class="form-title">Edit Listing</h3>
 
-    <form action="/listings/<%= listing._id %>?_method=PUT" method="POST">
+    <form action="/listings/<%= listing._id %>?_method=PUT" method="POST" novalidate class="needs-validation">
 
       <!-- Title -->
       <div class="mb-3">
-        <label class="form-label">Title</label>
+        <label class="form-label" >Title</label>
         <input 
           name="title" 
           class="form-control" 
           value="<%= listing.title %>" 
           required
         >
+        <div class="invalid-feedback"> Please enter the title !</div>
       </div>
 
       <!-- Description -->
@@ -26,7 +27,9 @@
           name="description" 
           class="form-control" 
           rows="3"
+          required
         ><%= listing.description %></textarea>
+        <div class="invalid-feedback"> Please enter a short description </div>
       </div>
 
       <!-- Price -->
@@ -35,10 +38,12 @@
         <input 
           name="price" 
           type="number" 
+          min="0"
           class="form-control" 
           value="<%= listing.price %>" 
           required
         >
+        <div class="invalid-feedback"> Please enter the valid price !</div>
       </div>
 
       <!-- Location -->
@@ -49,7 +54,9 @@
             name="location[city]" 
             class="form-control" 
             value="<%= listing.location?.city || '' %>"
+            required
           >
+          <div class="invalid-feedback"> Please enter the valid location !</div>
         </div>
 
         <div class="col-md-4 mb-3">
@@ -58,7 +65,9 @@
             name="location[area]" 
             class="form-control" 
             value="<%= listing.location?.area || '' %>"
+            required
           >
+          <div class="invalid-feedback"> Please enter the valid location !</div>
         </div>
 
         <div class="col-md-4 mb-3">
@@ -67,7 +76,9 @@
             name="location[address]" 
             class="form-control" 
             value="<%= listing.location?.address || '' %>"
+            required
           >
+          <div class="invalid-feedback"> Please enter the valid location !</div>
         </div>
       </div>
 
@@ -78,7 +89,8 @@
           name="images[0][url]" 
           class="form-control" 
           value="<%= listing.images[0]?.url || '' %>"
-        >
+          required
+        > 
       </div>
 
       <!-- Amenities -->
@@ -88,6 +100,7 @@
           name="amenities" 
           class="form-control" 
           value="<%= listing.amenities?.join(', ') || '' %>"
+          required
         >
       </div>
 
@@ -100,6 +113,7 @@
           step="0.1" 
           class="form-control" 
           value="<%= listing.rating || 0 %>"
+          required
         >
       </div>
 

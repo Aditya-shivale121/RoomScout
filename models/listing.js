@@ -7,7 +7,8 @@ const listingSchema = new Schema({
     description: String,
 
     price: {
-        type: Number,
+        type: Number, 
+        min : 0,
         required: true
     },
 
@@ -26,15 +27,24 @@ const listingSchema = new Schema({
 
     amenities: [String],
 
+    reviews: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Review"
+        }
+    ],
+
     owner: {
         type: Schema.Types.ObjectId,
         ref: "User"
     },
 
-    rating: {
-        type: Number,
-        default: 0
-    },
+   rating: {
+    type: Number,
+    min: 0,
+    max: 5,
+    required: true
+  },
 
     available: {
         type: Boolean,
