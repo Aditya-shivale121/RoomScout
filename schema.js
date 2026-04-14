@@ -46,17 +46,22 @@ const listingSchema = Joi.object({
             'any.required': 'Rating is required'
         }),
         available: Joi.boolean(),
+        locationCoordinates: Joi.object({
+            latitude: Joi.number().min(-90).max(90).required(),
+            longitude: Joi.number().min(-180).max(180).required()
+        }).optional(),
         amenities: Joi.array().items(Joi.string()).optional().messages({
             'array.base': 'Amenities must be an array of strings'
         })
-    }).required()
+    }).required(),
+    deleteImages: Joi.array().items(Joi.string()).optional()
 }).unknown(false);
 
 const validateListing = (req, res, next) => {
     const { error } = listingSchema.validate(req.body);
     if (error) {
         const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400);
+        throw new ExpressError(400, msg);
     } else {
         next();
     }
@@ -88,7 +93,7 @@ const validateReview = (req, res, next) => {
     const { error } = reviewSchema.validate(req.body);
     if (error) {
         const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400);
+        throw new ExpressError(400, msg);
     } else {
         next();
     }

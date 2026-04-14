@@ -18,6 +18,20 @@ const listingSchema = new Schema({
         area: String
     },
 
+    geometry: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point",
+        },
+        coordinates: {
+            type: [Number],
+            default: undefined,
+        },
+    },
+
+    geocodedAddress: String,
+
     images: [
         {
             url: String,
@@ -52,6 +66,8 @@ const listingSchema = new Schema({
     }
 
 }, { timestamps: true });
+
+listingSchema.index({ geometry: "2dsphere" });
 
 const Listing = mongoose.model("Listing", listingSchema);
 

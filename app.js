@@ -1,207 +1,157 @@
-const express = require("express");
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config();
+}
 
-const app = express();
-const mongoose = require("mongoose")
-const PORT = 3000;
-const Listing = require("../RoomScout/models/listing")
+const express = require("express");
+const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
-app.use(methodOverride("_method"));
 const ejsMate = require("ejs-mate");
-const ExpressError = require("./utils/Expresserror.js");
-const wrapAsync = require("./utils/wrapAsync");
-const { validateListing, validateReview } = require("./schema");
-const Review = require("../RoomScout/models/review");
+const session = require("express-session");
+const MongoStore = require("connect-mongo").default;
+const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
 
-const MONGO_URL = 'mongodb://127.0.0.1:27017/roomscout';
+const listingRouter = require("./routes/listings");
+const reviewRouter = require("./routes/reviews");
+const userRouter = require("./routes/users");
 
-// routes
+const app = express();
+const PORT = process.env.PORT || 3000;
+const MONGO_URL = process.env.ATLASDB_URL;
 
-app.get("/", (req, res) => {
-    res.send("Server is running");
+// ================= FIXED STORE =================
+const store = MongoStore.create({
+    mongoUrl: MONGO_URL,
+    crypto: {
+        secret: process.env.SESSION_SECRET,
+    },
+    touchAfter: 24 * 3600,
 });
 
+store.on("error", (err) => {
+    console.log("ERROR in MONGO SESSION", err);
+});
 
+// ================= SESSION =================
+const sessionOptions = {
+    store,
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
+};
+
+app.engine("ejs", ejsMate);
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(session(sessionOptions));
+app.use(flash());
+
+// ================= PASSPORT =================
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// ================= GLOBAL MIDDLEWARE =================
+app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+});
+
+// ================= ROUTES =================
+app.use("/", listingRouter);
+app.use("/listings/:id/reviews", reviewRouter);
+app.use("/", userRouter);
+
+// ================= ERROR HANDLER =================
+app.use((err, req, res, next) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Something went wrong";
+
+    if (req.get("referer")) {
+        req.flash("error", message);
+        return res.redirect(req.get("referer"));
+    }
+
+    res.status(status).render("listings/error", {
+        err: { status, message, stack: err.stack },
+    });
+});
+
+// ================= ADMIN CREATION =================
+async function ensureAdminUser() {
+    const adminUsername = process.env.ADMIN_USERNAME?.trim();
+    const adminEmail = process.env.ADMIN_EMAIL?.trim();
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminUsername || !adminEmail || !adminPassword) return;
+
+    const existingAdmin = await User.findOne({
+        $or: [{ username: adminUsername }, { email: adminEmail }],
+    });
+
+    if (existingAdmin) {
+        let shouldSave = false;
+
+        if (!existingAdmin.isAdmin) {
+            existingAdmin.isAdmin = true;
+            shouldSave = true;
+        }
+
+        if (!existingAdmin.email) {
+            existingAdmin.email = adminEmail;
+            shouldSave = true;
+        }
+
+        if (shouldSave) {
+            await existingAdmin.save();
+            console.log(`Admin user updated: ${existingAdmin.username}`);
+        }
+
+        return;
+    }
+
+    const adminUser = new User({
+        username: adminUsername,
+        email: adminEmail,
+        isAdmin: true,
+    });
+
+    await User.register(adminUser, adminPassword);
+    console.log(`Admin user created: ${adminUsername}`);
+}
+
+// ================= SERVER START =================
 async function startServer() {
-    try{
+    try {
         await mongoose.connect(MONGO_URL);
         console.log("Connected to DB");
 
-        app.listen(PORT ,() =>{
-            console.log(`Server is running on port ${PORT}`)
+        await ensureAdminUser();
+
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
         });
-    }catch (err){
+    } catch (err) {
         console.log("Database connection failed");
         console.log(err);
     }
-    
 }
 
 startServer();
-
-app.engine('ejs', ejsMate);
-app.set("view engine","ejs");
-app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
-
-
-
-// sample listing
-app.get("/testlisting", wrapAsync ( async(req, res) => {
-    try {
-
-        const sampleListing = new Listing({
-            title: "Single Room near DY Patil",
-            description: "Clean PG with WiFi and parking",
-
-            price: 5000,
-
-            location: {
-                address: "Nigdi pradhikaran",
-                city: "Pune",
-                area: "Akurdi"
-            },
-
-            images: [
-                {
-                    url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
-                    filename: "room1"
-                }
-            ],
-
-            amenities: ["WiFi", "Parking", "Laundry"],
-
-            rating: 4.2,
-            available: true
-        });
-
-        await sampleListing.save();
-        console.log("Sample listing ID:", sampleListing._id);
-
-        // Seed sample review
-        const sampleReview = new Review({
-            listing: sampleListing._id,
-            author: new mongoose.Types.ObjectId(), // dummy author
-            rating: 5,
-            body: "Great room! Clean and comfortable with good amenities."
-        });
-        await sampleReview.save();
-        console.log("Sample review created");
-
-        res.send(`Test listing created (ID: ${sampleListing._id}). Sample review also added.`);
-
-    } catch (err) {
-        console.log(err);
-        res.send("Error creating listing");
-    }
-}));
-
-// index route
-app.get("/listings",wrapAsync ( async (req,res) =>{
-   const allListings = await Listing.find({});
-   res.render("listings/index.ejs", {allListings});
-}));
-
-// new route
-app.get("/listings/new", (req ,res)=>{
-    res.render("listings/new.ejs")
-});
-
-// save data
-app.post("/listings", validateListing, wrapAsync(async (req, res) => {
-    let data = req.body.listing;
-
-    // convert amenities to array
-    if (data.amenities) {
-        data.amenities = data.amenities.split(",");
-    }
-
-    const newListing = new Listing(data);
-    await newListing.save();
-    res.redirect("/listings");
-}));
-// show route
-app.get("/listings/:id" , wrapAsync(async (req ,res) =>{
-    const {id} = req.params;
-    const listing = await Listing.findById(id).populate('reviews'); 
-    res.render("listings/show", { listing });
-}));
-
-//edit route
-app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
-     const {id} = req.params;
-    const listing = await Listing.findById(id); 
-    res.render("listings/edit.ejs",{ listing })
-}));
-
-app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
-    const { id } = req.params;
-
-    let data = req.body.listing;
-
-    // fix amenities (string → array)
-    if (data.amenities) {
-        data.amenities = data.amenities.split(",");
-    }
-
-    await Listing.findByIdAndUpdate(id, { ...data });
-
-    res.redirect(`/listings/${id}`);
-}));
-
-// delete listing
-app.delete("/listings/:id",wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    
-    // Cascade delete reviews first
-    const listing = await Listing.findById(id).populate('reviews');
-    if (listing && listing.reviews && listing.reviews.length > 0) {
-        await Review.deleteMany({ _id: { $in: listing.reviews.map(r => r._id) } });
-    }
-    
-    await Listing.findByIdAndDelete(id);
-    res.redirect("/listings");
-}));
-
-// create review
-app.post("/listings/:id/reviews", validateReview, wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    const listing = await Listing.findById(id);
-
-    if (!listing) {
-        throw new ExpressError("Listing not found", 404);
-    }
-
-    const review = new Review({ 
-        listing: id, 
-        author: new mongoose.Types.ObjectId(),
-        rating: req.body.review.rating, 
-        body: req.body.review.body 
-    });
-
-    listing.reviews.push(review._id);
-
-    await review.save();
-    await listing.save();
-
-    res.redirect(`/listings/${id}`);
-}));
-
-// delete review
-app.delete("/listings/:id/reviews/:reviewId", wrapAsync(async (req, res) => {
-    const { id, reviewId } = req.params;
-    await Review.findByIdAndDelete(reviewId);
-    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    res.redirect(`/listings/${id}`);
-}));
-
-
-
-
-// all routes above
-
-app.use((err, req, res, next) => {
-    const { statusCode = 500, message = "Something went wrong" } = err;
-    res.status(statusCode).send(message);
-});
