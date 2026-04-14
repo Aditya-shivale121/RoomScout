@@ -4,64 +4,104 @@
 
   <h3 class="form-title">Create New Listing</h3>
 
-  <form action="/listings" method="POST">
+  <form action="/listings" method="POST" enctype="multipart/form-data" novalidate class="needs-validation">
 
     <!-- Title -->
     <div class="mb-3">
       <label class="form-label">Title</label>
-      <input name="title" class="form-control" placeholder="Enter title" required>
+      <input name="listing[title]" class="form-control" placeholder="Enter title" required>
+      <div class="valid-feedback">
+      Looks good!
+    </div>
     </div>
 
     <!-- Description -->
     <div class="mb-3">
       <label class="form-label">Description</label>
-      <textarea name="description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+      <textarea name="listing[description]" class="form-control" rows="3" placeholder="Enter description" required ></textarea>
+      <div class="invalid-feedback"> Please enter a short description </div>
     </div>
 
     <!-- Price -->
     <div class="mb-3">
       <label class="form-label">Price (₹)</label>
-      <input name="price" type="number" class="form-control" placeholder="Enter price" required>
+      <input name="listing[price]" type="number" class="form-control" placeholder="Enter price" required>
+      <div class="invalid-feedback"> Price should be valid  ! </div>
     </div>
 
     <!-- Location -->
     <div class="row">
-      <div class="col-md-4 mb-3">
+      <div class="col-md-4 mb-3" >
         <label class="form-label">City</label>
-        <input name="location[city]" class="form-control">
+        <input name="listing[location][city]" class="form-control" required>
+        <div class="invalid-feedback"> Location should be valid  ! </div>
       </div>
 
-      <div class="col-md-4 mb-3">
+      <div class="col-md-4 mb-3" >
         <label class="form-label">Area</label>
-        <input name="location[area]" class="form-control">
+        <input name="listing[location][area]" class="form-control " required>
+
       </div>
 
-      <div class="col-md-4 mb-3">
+      <div class="col-md-4 mb-3 ">
         <label class="form-label">Address</label>
-        <input name="location[address]" class="form-control">
+        <input name="listing[location][address]" class="form-control" required>
       </div>
     </div>
 
-    <!-- Image -->
-    <div class="mb-3">
-      <label class="form-label">Image URL</label>
-      <input name="images[0][url]" class="form-control" placeholder="Paste image URL">
+    <div class="geolocation-panel mb-3">
+      <label class="form-label">Choose location on map</label>
+      <div
+        id="new-listing-location-picker"
+        class="location-picker-map"
+        data-location-picker
+        data-latitude-target="new-listing-latitude"
+        data-longitude-target="new-listing-longitude"
+        data-status-target="new-listing-geolocation-status"
+        data-default-latitude="18.5204"
+        data-default-longitude="73.8567"
+      ></div>
+      <button
+        type="button"
+        class="geolocation-btn"
+        data-geolocation-button
+        data-picker-target="new-listing-location-picker"
+        data-latitude-target="new-listing-latitude"
+        data-longitude-target="new-listing-longitude"
+        data-status-target="new-listing-geolocation-status"
+      >
+        Use my current location
+      </button>
+      <input type="hidden" id="new-listing-latitude" name="listing[locationCoordinates][latitude]">
+      <input type="hidden" id="new-listing-longitude" name="listing[locationCoordinates][longitude]">
+      <p id="new-listing-geolocation-status" class="geolocation-status">
+        Click the map to place the room marker, or use your current location.
+      </p>
+    </div>
+
+    <!-- Images -->
+    <div class="mb-3 ">
+      <label class="form-label">Room Images</label>
+      <input name="images" type="file" class="form-control" accept="image/*" multiple required>
+      <div class="upload-help">Upload one or more photos of the room. Max size: 5 MB each.</div>
     </div>
 
     <!-- Amenities -->
     <div class="mb-3">
       <label class="form-label">Amenities</label>
-      <input name="amenities" class="form-control" placeholder="WiFi, Parking, Laundry">
+      <input name="listing[amenities]" class="form-control" placeholder="WiFi, Parking, Laundry" required>
     </div>
 
     <!-- Rating -->
     <div class="mb-3">
       <label class="form-label">Rating</label>
-      <input name="rating" type="number" step="0.1" class="form-control" placeholder="0 to 5">
+      <input name="listing[rating]" type="number" min="0" max="5" step="0.1" class="form-control" placeholder="0 to 5" required>
     </div>
+   
 
     <!-- Submit -->
-    <button type="submit" class="btn submit-btn">Create Listing</button>
+    <button type="submit" class="submit-btn">Create Listing</button>
+     
 
   </form>
 

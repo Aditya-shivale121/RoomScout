@@ -1,0 +1,41 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+
+  <div class="card shadow text-center p-4" style="max-width: 500px; width: 100%;">
+
+    <div class="card-body">
+
+      <!-- Status Code -->
+      <h1 class="display-3 text-danger">
+        <%= err.status || 500 %>
+      </h1>
+
+      <!-- Title -->
+      <h4 class="mb-3">Something went wrong</h4>
+
+      <!-- Message -->
+      <p class="text-muted">
+        <%= err.message || "Unexpected error occurred" %>
+      </p>
+
+      <!-- Action buttons -->
+      <div class="mt-4 d-flex justify-content-center gap-2">
+        <a href="/listings" class="btn btn-primary">Go to Listings</a>
+        <a href="/" class="btn btn-outline-secondary">Home</a>
+      </div>
+
+      <!-- Dev only (remove in production) -->
+      <% if (err.stack) { %>
+        <hr>
+        <details class="text-start">
+          <summary class="text-secondary">Stack Trace</summary>
+          <pre class="small text-muted"><%= err.stack %></pre>
+        </details>
+      <% } %>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,26 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="auth-shell">
+  <div class="auth-panel">
+    <div class="auth-copy">
+      <p class="auth-kicker">RoomScout Access</p>
+      <h3 class="auth-heading">Log into your account</h3>
+      <p class="auth-text">Continue to manage your listings, write reviews, and access protected actions.</p>
+    </div>
+
+    <form action="/login" method="POST" class="auth-form needs-validation" novalidate>
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input name="username" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input name="password" type="password" class="form-control" required>
+      </div>
+
+      <button type="submit" class="submit-btn">Log In</button>
+      <p class="auth-switch">New here? <a href="/signup">Create an account</a></p>
+    </form>
+  </div>
+</div>

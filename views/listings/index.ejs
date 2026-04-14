@@ -1,53 +1,71 @@
 <% layout('layouts/boilerplate') %>
 
 <div class="container page-container">
-  <h3>All Listings</h3>
+  <section class="hero-panel">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">RoomScout</p>
+      <h1 class="hero-title">Find a place that feels worth coming home to.</h1>
+      <p class="hero-text">Browse rooms, compare neighborhoods, and explore spaces with clear pricing, real photos, and location context.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat-card">
+        <span class="hero-stat-value"><%= allListings.length %></span>
+        <span class="hero-stat-label">Active listings</span>
+      </div>
+      <div class="hero-stat-card">
+        <span class="hero-stat-value">24/7</span>
+        <span class="hero-stat-label">Search access</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-heading">
+    <h3>All Listings</h3>
+    <p>Fresh rooms, clearer details, and a better way to compare options.</p>
+  </div>
 
   <div class="row">
-
     <% for (let listing of allListings) { %>
-
       <div class="col-md-4 mb-4">
-        
         <a href="/listings/<%= listing._id %>" class="card-link">
-          
           <div class="card h-100">
-
-            <!-- Optimized Image -->
-            <img 
-              src="<%= listing.images[0]?.url || 'https://via.placeholder.com/300' %>" 
+            <img
+              src="<%= listing.images[0]?.url || 'https://via.placeholder.com/300' %>"
               class="card-img-top"
               alt="listing-image"
               loading="lazy"
             >
 
-            <div class="card-body">
+            <% if (listing.images && listing.images.length > 1) { %>
+            <span class="media-count-badge"><%= listing.images.length %> photos</span>
+            <% } %>
 
-              <h5 class="card-title">
-                <%= listing.title %>
-              </h5>
+            <div class="card-body">
+              <h5 class="card-title"><%= listing.title %></h5>
 
               <p class="price">
-                ₹ <%= listing.price %> / month
+                Rs. <%= Number(listing.price || 0).toLocaleString("en-IN") %> / month
               </p>
 
               <p class="location">
                 <%= listing.location?.city %>, <%= listing.location?.area %>
               </p>
 
-              <p class="rating">
-                ⭐ <%= listing.rating %>
-              </p>
-
+              <div
+                class="rating-badge"
+                style="--rating: <%= Number(listing.rating || 0) %>;"
+                aria-label="Rated <%= Number(listing.rating || 0).toFixed(1) %> out of 5"
+              >
+                <span class="star-meter" aria-hidden="true">
+                  <span class="star-meter-base">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                  <span class="star-meter-fill">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                </span>
+                <span class="rating-value"><%= Number(listing.rating || 0).toFixed(1) %></span>
+              </div>
             </div>
-
           </div>
-
         </a>
-
       </div>
-
     <% } %>
-
   </div>
 </div>

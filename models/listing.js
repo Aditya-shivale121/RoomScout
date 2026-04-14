@@ -7,7 +7,8 @@ const listingSchema = new Schema({
     description: String,
 
     price: {
-        type: Number,
+        type: Number, 
+        min : 0,
         required: true
     },
 
@@ -16,6 +17,20 @@ const listingSchema = new Schema({
         city: String,
         area: String
     },
+
+    geometry: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point",
+        },
+        coordinates: {
+            type: [Number],
+            default: undefined,
+        },
+    },
+
+    geocodedAddress: String,
 
     images: [
         {
@@ -26,15 +41,24 @@ const listingSchema = new Schema({
 
     amenities: [String],
 
+    reviews: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Review"
+        }
+    ],
+
     owner: {
         type: Schema.Types.ObjectId,
         ref: "User"
     },
 
-    rating: {
-        type: Number,
-        default: 0
-    },
+   rating: {
+    type: Number,
+    min: 0,
+    max: 5,
+    required: true
+  },
 
     available: {
         type: Boolean,
@@ -42,6 +66,8 @@ const listingSchema = new Schema({
     }
 
 }, { timestamps: true });
+
+listingSchema.index({ geometry: "2dsphere" });
 
 const Listing = mongoose.model("Listing", listingSchema);
 

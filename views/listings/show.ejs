@@ -1,68 +1,217 @@
 <% layout('layouts/boilerplate') %>
 
+<%
+  const locationParts = [
+    listing.location?.address,
+    listing.location?.area,
+    listing.location?.city
+  ].filter(Boolean);
+  const roomLocation = locationParts.join(", ");
+  const mapQuery = encodeURIComponent(roomLocation);
+  const coordinates = listing.geometry?.coordinates || [];
+  const mapLongitude = Number(coordinates[0]);
+  const mapLatitude = Number(coordinates[1]);
+  const hasMapCoordinates = Number.isFinite(mapLongitude) && Number.isFinite(mapLatitude);
+%>
+
 <div class="container page-container">
 
   <h3>Listing Details</h3>
 
   <div class="card show-card">
 
-    <!-- Image -->
-    <img 
-      src="<%= listing.images[0]?.url || 'https://via.placeholder.com/600' %>" 
-      class="show-img"
-      alt="listing-image"
-    >
+    <div class="show-gallery">
+      <img
+        src="<%= listing.images[0]?.url || 'https://via.placeholder.com/600' %>"
+        class="show-img"
+        alt="listing-image"
+      >
+
+      <% if (listing.images && listing.images.length > 1) { %>
+      <div class="show-thumb-grid">
+        <% for (let image of listing.images.slice(1)) { %>
+        <a href="<%= image.url %>" target="_blank" rel="noopener noreferrer" class="show-thumb-link">
+          <img src="<%= image.url %>" class="show-thumb-img" alt="listing-image-thumbnail">
+        </a>
+        <% } %>
+      </div>
+      <% } %>
+    </div>
 
     <div class="card-body">
 
-      <!-- Title -->
       <h4 class="show-title"><%= listing.title %></h4>
 
-      <!-- Price -->
       <p class="show-price">
-        ₹ <%= listing.price.toLocaleString("en-IN") %> / month
+        Rs. <%= listing.price.toLocaleString("en-IN") %> / month
       </p>
 
-      <!-- Location -->
       <p class="show-location">
-        <%= listing.location?.address %>, 
-        <%= listing.location?.area %>, 
+        <%= listing.location?.address %>,
+        <%= listing.location?.area %>,
         <%= listing.location?.city %>
       </p>
 
-      <!-- Description -->
+      <% if (hasMapCoordinates) { %>
+      <div class="room-map-panel">
+        <div
+          class="room-map-frame"
+          data-room-map
+          data-latitude="<%= mapLatitude %>"
+          data-longitude="<%= mapLongitude %>"
+          data-title="<%= listing.title %>"
+          data-address="<%= listing.geocodedAddress || roomLocation %>"
+        ></div>
+        <a
+          class="room-map-link"
+          href="https://www.google.com/maps/search/?api=1&query=<%= mapLatitude %>,<%= mapLongitude %>"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Open location in Google Maps
+        </a>
+      </div>
+      <% } else if (roomLocation) { %>
+      <p class="room-map-missing">Map marker will appear after this listing location is geocoded.</p>
+      <a
+        class="room-map-link"
+        href="https://www.google.com/maps/search/?api=1&query=<%= mapQuery %>"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open location in Google Maps
+      </a>
+      <% } %>
+
+      <% if (listing.owner) { %>
+      <p class="show-owner">
+        Listed by <strong><%= listing.owner.username %></strong>
+      </p>
+      <% } %>
+
       <p class="show-desc">
         <%= listing.description %>
       </p>
 
-      <!-- Amenities -->
       <p class="show-amenities">
         <strong>Amenities:</strong>
         <%= listing.amenities?.join(", ") %>
       </p>
 
-      <!-- Rating -->
-      <p class="show-rating">
-        ⭐ <%= listing.rating %>
+      <p class="show-photo-count">
+        <strong>Photos:</strong> <%= listing.images?.length || 0 %>
       </p>
 
-      <!-- Actions -->
-      <div class="show-actions">
+      <div class="show-rating-panel">
+        <span class="show-rating-label">Guest rating</span>
+        <div
+          class="rating-badge rating-badge-lg"
+          style="--rating: <%= Number(listing.rating || 0) %>;"
+          aria-label="Rated <%= Number(listing.rating || 0).toFixed(1) %> out of 5"
+        >
+          <span class="star-meter" aria-hidden="true">
+            <span class="star-meter-base">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="star-meter-fill">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+          </span>
+          <span class="rating-value"><%= Number(listing.rating || 0).toFixed(1) %></span>
+          <span class="rating-scale">/ 5</span>
+        </div>
+      </div>
 
+      <% if (currentUser && (currentUser.isAdmin || (listing.owner && listing.owner._id.equals(currentUser._id)))) { %>
+      <div class="show-actions">
+        <% if (currentUser.isAdmin && !listing.owner) { %>
+        <p class="text-muted small mb-2">This legacy listing has no owner. You are managing it with admin access.</p>
+        <% } else if (currentUser.isAdmin && listing.owner && !listing.owner._id.equals(currentUser._id)) { %>
+        <p class="text-muted small mb-2">You are managing this listing with admin access.</p>
+        <% } %>
         <a href="/listings/<%= listing._id %>/edit" class="btn edit-btn">
           Edit
         </a>
 
         <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST">
-          <button 
+          <button
             class="btn delete-btn"
             onclick="return confirm('Delete this listing?')"
           >
             Delete
           </button>
         </form>
-
       </div>
+      <% } %>
+
+      <div class="review-section mt-4">
+        <h5>Add Your Review</h5>
+        <% if (currentUser) { %>
+        <form action="/listings/<%= listing._id %>/reviews" method="POST" class="mb-4">
+          <div class="mb-3">
+            <label class="form-label">Rating:</label>
+            <fieldset class="rating-picker" aria-label="Choose a rating">
+              <input type="radio" id="review-star-5" name="review[rating]" value="5" required>
+              <label for="review-star-5" title="5 stars"></label>
+
+              <input type="radio" id="review-star-4" name="review[rating]" value="4">
+              <label for="review-star-4" title="4 stars"></label>
+
+              <input type="radio" id="review-star-3" name="review[rating]" value="3">
+              <label for="review-star-3" title="3 stars"></label>
+
+              <input type="radio" id="review-star-2" name="review[rating]" value="2">
+              <label for="review-star-2" title="2 stars"></label>
+
+              <input type="radio" id="review-star-1" name="review[rating]" value="1">
+              <label for="review-star-1" title="1 star"></label>
+            </fieldset>
+            <p class="rating-helper">Tap a star to rate this listing from 1 to 5.</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Review:</label>
+            <textarea name="review[body]" class="form-control" rows="3" required placeholder="Share your experience..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+        <% } else { %>
+        <div class="auth-note">
+          <p class="mb-2">Log in to add a review for this listing.</p>
+          <a href="/login" class="btn btn-outline-dark btn-sm">Go to Login</a>
+        </div>
+        <% } %>
+      </div>
+
+      <% if (listing.reviews && listing.reviews.length > 0) { %>
+      <div class="reviews-list mt-4">
+        <h5>Reviews (<%= listing.reviews.length %>)</h5>
+        <% for (let review of listing.reviews) { %>
+        <div class="review-item mb-3 p-3 bg-light border rounded">
+          <div class="review-head mb-2">
+            <div
+              class="rating-badge rating-badge-sm"
+              style="--rating: <%= Number(review.rating || 0) %>;"
+              aria-label="Rated <%= Number(review.rating || 0).toFixed(1) %> out of 5"
+            >
+              <span class="star-meter" aria-hidden="true">
+                <span class="star-meter-base">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                <span class="star-meter-fill">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+              </span>
+              <span class="rating-value"><%= Number(review.rating || 0).toFixed(1) %></span>
+            </div>
+            <small class="text-muted"><%= review.createdAt.toLocaleDateString() %></small>
+          </div>
+          <p class="review-author mb-2">By <strong><%= review.author?.username || "Unknown user" %></strong></p>
+          <p class="mb-2"><%= review.body %></p>
+          <% if (currentUser && (currentUser.isAdmin || (review.author && review.author._id.equals(currentUser._id)))) { %>
+          <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" style="display: inline;">
+            <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this review?')">Delete</button>
+          </form>
+          <% } %>
+        </div>
+        <% } %>
+      </div>
+      <% } else { %>
+      <div class="no-reviews mt-4 text-center text-muted">
+        <p>No reviews yet. <strong>Be the first to review this listing!</strong></p>
+      </div>
+      <% } %>
 
     </div>
 

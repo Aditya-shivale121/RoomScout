@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const ExpressError = require("./utils/Expresserror");
 
 const listingSchema = Joi.object({
     listing: Joi.object({
@@ -45,20 +46,57 @@ const listingSchema = Joi.object({
             'any.required': 'Rating is required'
         }),
         available: Joi.boolean(),
+        locationCoordinates: Joi.object({
+            latitude: Joi.number().min(-90).max(90).required(),
+            longitude: Joi.number().min(-180).max(180).required()
+        }).optional(),
         amenities: Joi.array().items(Joi.string()).optional().messages({
             'array.base': 'Amenities must be an array of strings'
         })
-    }).required()
+    }).required(),
+    deleteImages: Joi.array().items(Joi.string()).optional()
 }).unknown(false);
 
 const validateListing = (req, res, next) => {
     const { error } = listingSchema.validate(req.body);
     if (error) {
         const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400);
+        throw new ExpressError(400, msg);
     } else {
         next();
     }
 };
 
-module.exports = { listingSchema, validateListing };
+const reviewSchema = Joi.object({
+    review: Joi.object({
+        author: Joi.string().messages({
+            'string.base': 'Author ID must be a string',
+            'any.required': 'Author ID is required'
+        }),
+        rating: Joi.number().min(1).max(5).required().messages({
+            'number.base': 'Rating must be a number',
+            'number.min': 'Rating must be at least 1',
+            'number.max': 'Rating cannot exceed 5',
+            'any.required': 'Rating is required'
+        }),
+        body: Joi.string().required().trim().min(3).max(500).messages({
+            'string.base': 'Body must be a string',
+            'string.empty': 'Body cannot be empty',
+            'string.min': 'Review must be at least 3 characters',
+            'string.max': 'Review cannot exceed 500 characters',
+            'any.required': 'Review body is required'
+        })
+    }).required()
+}).unknown(false);
+
+const validateReview = (req, res, next) => {
+    const { error } = reviewSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',');
+        throw new ExpressError(400, msg);
+    } else {
+        next();
+    }
+};
+
+module.exports = { listingSchema, validateListing, reviewSchema, validateReview };

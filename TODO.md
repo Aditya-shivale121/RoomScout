@@ -1,17 +1,35 @@
-# Joi Schema Validation Task Progress
+# RoomScout Review System Implementation
 
-## Plan Steps:
-- [✅] **Step 1**: Complete `schema.js` with full Joi validation schema and `validateListing` middleware
-- [✅] **Step 2**: Update `app.js` to import and use `validateListing` middleware on POST/PUT listing routes  
-- [✅] **Step 3**: Test validation by running server and trying invalid form submissions
-- [✅] **Step 4**: Verify error handling integrates with existing ExpressError middleware
+## Current Status
+- [x] Models ready (Review, Listing relationship)
+- [x] Review validation schema ready
+- [x] Create review route exists (needs author fix)
 
-**Current Status**: ✅ All steps complete! Server running on localhost:3000 with full Joi validation.
+## Implementation Plan
 
-**Manual Test Commands:**
-```
-# Invalid data (expect 400 error)
-curl -X POST http://localhost:3000/listings -H "Content-Type: application/x-www-form-urlencoded" -d "listing[description]=test&listing[price]=1000"
+### 1. Backend Fixes
+- [x] Fix show route - populate reviews  
+- [x] Add DELETE /listings/:id/reviews/:reviewId
+- [x] Fix DELETE listing - cascade delete reviews
+- [x] Fix review.author (using dummy ObjectId)
 
-# Visit form: http://localhost:3000/listings/new
-```
+### 2. Frontend ✓
+- [x] Add review form to show.ejs
+- [x] Display reviews list in show.ejs
+- [x] Add delete review buttons
+
+### 3. Styling ✓
+- [x] Review card styling
+- [x] Star rating display
+- [x] Form styling
+
+### 4. Testing ✓
+- [x] Create review flow (test with /testlisting)
+- [x] Delete review 
+- [x] Delete listing cascade
+- [x] Validation errors (Joi schema active)
+
+### 5. Polish [ ]
+- [ ] Calculate aggregate listing rating
+- [ ] Add auth middleware
+- [ ] Prevent duplicate reviews per user
