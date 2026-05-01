@@ -137,7 +137,6 @@ http://localhost:3000
 ## 👤 Author
 
 Aditya Shivale
-AI & Data Science Student
 
 GitHub: [https://github.com/Aditya-shivale121](https://github.com/Aditya-shivale121)
 
